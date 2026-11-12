@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101b19">
+<title>Airly — Luftqualität live</title>
+<style>
+:root{--bg:#f3f5f1;--ink:#17231f;--muted:#78827c;--line:#e5e9e3;--green:#b8ed78;--deep:#15241f;--card:#fff;--shadow:0 18px 50px rgba(24,42,32,.07);--accent-soft:#b8ed7830;--tip-bg:#e8f1df;--tip-icon-bg:#d5e9c4;--bar-fill:#a8d76e;--chart-line:#78ad4f;--chart-fill:#a9d978}
+body[data-air-quality="fair"],body[data-air-quality="moderate"]{--green:#ffc078;--deep:#302316;--accent-soft:#ffc07830;--tip-bg:#fff0dc;--tip-icon-bg:#ffdfb5;--bar-fill:#efa34e;--chart-line:#dc8734;--chart-fill:#efa34e}
+body[data-air-quality="poor"]{--green:#ff8585;--deep:#321b1d;--accent-soft:#ff858530;--tip-bg:#fde6e6;--tip-icon-bg:#f8caca;--bar-fill:#e66b6b;--chart-line:#d94d4d;--chart-fill:#e66b6b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{height:76px;padding:0 max(5vw,24px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:rgba(255,255,255,.72)}
+.brand{display:flex;align-items:center;gap:11px;font-size:20px;font-weight:800;letter-spacing:-.7px}.logo{width:34px;height:34px;border-radius:11px;background:var(--green);display:grid;place-items:center;font-size:19px}
+.header-right{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}.live-dot{width:7px;height:7px;border-radius:50%;background:var(--chart-line);display:inline-block;box-shadow:0 0 0 4px var(--accent-soft)}
+main{max-width:1160px;margin:auto;padding:46px 24px 70px}.eyebrow{text-transform:uppercase;letter-spacing:2px;font-size:10px;font-weight:800;color:#738078}
+.hero{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px}.hero h1{font-size:clamp(34px,5vw,54px);letter-spacing:-2.8px;line-height:1.02;margin:12px 0 10px}.hero p{color:var(--muted);margin:0;font-size:14px}
+.search{display:flex;gap:8px;background:white;padding:6px;border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 20px #15241f08;min-width:min(350px,100%)}
+.search input{border:0;outline:0;min-width:0;flex:1;padding:0 12px;font:inherit;font-size:13px}.search button{border:0;background:var(--deep);color:white;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}.search button:hover{background:var(--chart-line)}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.panel{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.overview{padding:26px;min-height:310px;position:relative;overflow:hidden;background:var(--deep);color:white}.overview:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-70px;top:-90px;background:radial-gradient(circle,var(--accent-soft),transparent 68%)}
+.loc{font-size:13px;color:#bdc9c1;display:flex;gap:8px;align-items:center}.loc strong{color:white;font-weight:650}.overview-main{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:36px;position:relative;z-index:1}
+.aqi-number{font-size:clamp(76px,10vw,112px);font-weight:750;letter-spacing:-7px;line-height:.95}.aqi-caption{font-size:12px;color:#aebbb3;margin-top:10px}.quality{display:inline-flex;padding:8px 12px;border-radius:99px;background:var(--accent-soft);color:var(--green);font-size:12px;font-weight:750;margin-top:15px}
+.gauge{width:132px;height:132px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) 0deg 230deg,#ffffff1c 230deg 360deg);position:relative;flex-shrink:0}.gauge:before{content:"";position:absolute;inset:10px;border-radius:50%;background:var(--deep)}.gauge span{position:relative;font-size:11px;color:#d7e0da;text-align:center;line-height:1.5}.gauge b{display:block;font-size:20px;color:white}
+.meta{display:flex;gap:22px;margin-top:28px;padding-top:18px;border-top:1px solid #ffffff20;color:#b6c2ba;font-size:11px}.meta b{display:block;color:white;font-size:12px;margin-top:5px}
+.side{padding:25px 25px 18px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.section-head h2{font-size:16px;letter-spacing:-.4px;margin:0}.subtle{font-size:11px;color:var(--muted)}
+.pollutants{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pollutant{border:1px solid var(--line);border-radius:15px;padding:15px}.pollutant-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px}.symbol{font-weight:800;color:#52645a;background:#f0f4ed;padding:5px 7px;border-radius:7px}.value{font-size:25px;font-weight:750;letter-spacing:-1px;margin-top:12px}.unit{font-size:10px;color:var(--muted);font-weight:500;letter-spacing:0}.bar{height:4px;background:#edf0eb;border-radius:9px;margin-top:12px;overflow:hidden}.bar i{display:block;height:100%;width:25%;background:var(--bar-fill);border-radius:9px}
+.forecast{margin-top:18px;padding:24px 26px}.chart{height:150px;position:relative;margin-top:15px}.chart svg{width:100%;height:100%;overflow:visible}.chart-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:4px}
+.tip{margin-top:18px;padding:19px 22px;border-radius:18px;background:var(--tip-bg);display:flex;gap:14px;align-items:center}.tip-icon{width:38px;height:38px;border-radius:12px;background:var(--tip-icon-bg);display:grid;place-items:center;font-size:18px}.tip strong{font-size:12px}.tip p{margin:4px 0 0;color:#657466;font-size:11px;line-height:1.5}
+footer{max-width:1160px;margin:0 auto;padding:0 24px 35px;color:#87918a;font-size:10px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}footer a{color:#53685b}
+.status{font-size:11px;color:var(--muted);margin-top:10px;min-height:16px}
+.availability-notice{display:flex;align-items:center;gap:16px;margin:0 0 18px;padding:22px 25px;border:1px solid var(--line);border-radius:18px;background:var(--card);box-shadow:var(--shadow)}
+.availability-notice[hidden]{display:none}
+.availability-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:14px;background:var(--accent-soft);color:var(--chart-line);font-size:23px;font-weight:700}
+.availability-notice strong{display:block;font-size:14px;letter-spacing:-.2px;color:var(--ink)}
+.availability-notice p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+body[data-data-unavailable="true"] .grid,
+body[data-data-unavailable="true"] .forecast,
+body[data-data-unavailable="true"] .tip{display:none}
+@media(max-width:760px){main{padding-top:32px}.hero{align-items:stretch;flex-direction:column}.search{min-width:0;width:100%}.grid{grid-template-columns:1fr}.overview{min-height:285px}.gauge{width:112px;height:112px}.forecast{padding:21px}.meta{gap:15px}}
+@media(max-width:420px){.overview{padding:21px}.side{padding:21px}.aqi-number{font-size:82px}.gauge{width:92px;height:92px}.pollutants{gap:8px}.pollutant{padding:12px}.value{font-size:22px}}
+
+.data-attribution{max-width:1280px;margin:28px auto 0;padding:18px 20px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.65}
+.data-attribution strong{display:block;margin-bottom:5px;color:var(--ink);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.data-attribution p{margin:3px 0}
+.data-attribution a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.data-attribution a:hover{color:var(--ink)}
+
+</style>
+</head>
+<body>
+<header><div class="brand"><span class="logo">↗</span>airly<span style="color:#9aa69d;font-weight:500">.</span></div><div class="header-right"><span class="live-dot"></span> LIVE-DATEN <span style="opacity:.5">·</span> OPEN-METEO</div></header>
+<main>
+  <div class="hero">
+    <div><div class="eyebrow">Dein täglicher Atem-Check</div><h1>Luft. Klarheit.<br>Auf einen Blick.</h1><p>Entdecke, wie sauber die Luft um dich herum gerade ist.</p></div>
+    <form class="search" id="searchForm"><input id="placeInput" aria-label="Ort suchen" placeholder="Stadt suchen …" value="Hamburg"><button type="submit">Suchen ↗</button></form>
+  </div>
+  <section class="availability-notice" id="availabilityNotice" role="alert" aria-live="assertive" hidden>
+    <div class="availability-icon" aria-hidden="true">↻</div>
+    <div>
+      <strong>Zurzeit sind keine Daten verfügbar</strong>
+      <p>Die aktuellen Luftqualitätsdaten konnten gerade nicht abgerufen werden. Bitte versuche es später erneut.</p>
+    </div>
+  </section>
+  <div class="grid">
+    <section class="panel overview">
+      <div class="loc">⌖ <strong id="placeName">Hamburg, Deutschland</strong><span id="coords" style="opacity:.6">53.55° N · 9.99° E</span></div>
+      <div class="overview-main"><div><div class="eyebrow" style="color:#9eaea3">EUROPÄISCHER LUFTQUALITÄTSINDEX</div><div class="aqi-number" id="aqi">—</div><div class="aqi-caption">European AQI · aktueller Modellwert</div><div class="quality" id="quality">Daten werden geladen</div></div><div class="gauge"><span><b id="gaugeLabel">—</b>EU AQI</span></div></div>
+      <div class="meta"><div>LETZTES UPDATE<b id="updated">—</b></div><div>ZEITZONE<b id="timezone">—</b></div><div>DATENQUELLE<b>CAMS / Open-Meteo</b></div></div>
+    </section>
+    <section class="panel side">
+      <div class="section-head"><h2>Schadstoff-Level</h2><span class="subtle">μg/m³</span></div>
+      <div class="pollutants">
+        <div class="pollutant"><div class="pollutant-top"><span>Feinstaub</span><span class="symbol">PM2.5</span></div><div class="value" id="pm25">— <span class="unit">μg/m³</span></div><div class="bar"><i id="bar-pm25"></i></div></div>
+        <div class="pollutant"><div class="pollutant-top"><span>Feinstaub</span><span class="symbol">PM10</span></div><div class="value" id="pm10">— <span class="unit">μg/m³</span></div><div class="bar"><i id="bar-pm10"></i></div></div>
+        <div class="pollutant"><div class="pollutant-top"><span>Stickstoffdioxid</span><span class="symbol">NO₂</span></div><div class="value" id="no2">— <span class="unit">μg/m³</span></div><div class="bar"><i id="bar-no2"></i></div></div>
+        <div class="pollutant"><div class="pollutant-top"><span>Ozon</span><span class="symbol">O₃</span></div><div class="value" id="o3">— <span class="unit">μg/m³</span></div><div class="bar"><i id="bar-o3"></i></div></div>
+      </div><div class="status" id="status" aria-live="polite">Verbindung zur Open-Meteo API wird hergestellt …</div>
+    </section>
+  </div>
+  <section class="panel forecast">
+    <div class="section-head"><div><h2>Luftqualität im Tagesverlauf</h2><div class="subtle" style="margin-top:5px">Stündlicher European AQI · heute</div></div><span class="subtle">Nächste Stunden</span></div>
+    <div class="chart"><svg id="chart" viewBox="0 0 900 150" preserveAspectRatio="none" role="img" aria-label="Diagramm der stündlichen Luftqualität"><line x1="0" y1="120" x2="900" y2="120" stroke="#e8ece6"/><text x="0" y="14" fill="#98a39b" font-size="10">AQI</text></svg></div>
+    <div class="chart-labels" id="chartLabels"><span>—</span><span>—</span><span>—</span><span>—</span><span>—</span></div>
+  </section>
+  <div class="tip"><div class="tip-icon">✳</div><div><strong id="tipTitle">Dein Luft-Impuls</strong><p id="tipText">Die aktuellen Empfehlungen werden passend zur Luftqualität geladen.</p></div></div>
+</main>
+<footer><span>© 2026 airly. Datenbasierte Orientierung für deinen Alltag.</span><span>Quelle: <a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noreferrer">Open-Meteo Air Quality API</a> · CAMS ENSEMBLE</span>
+<div class="data-attribution" aria-label="Datenquellen">
+  <strong>Datenquellen</strong>
+  <p>Luftqualitätsdaten: CAMS ENSEMBLE über
+    <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>.
+    Die Daten wurden für die Darstellung auf dieser Website aufbereitet.
+  </p>
+  <p>Lizenz:
+    <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.
+  </p>
+  <p class="data-attribution-links">
+    <a href="https://atmosphere.copernicus.eu/" target="_blank" rel="noopener noreferrer">CAMS / Copernicus</a>
+    <span aria-hidden="true"> · </span>
+    <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>
+  </p>
+</div>
+
+</footer>
+<script>
+const $=id=>document.getElementById(id);
+let locationNow={name:"Hamburg, Deutschland",lat:53.5511,lon:9.9937}; let refreshTimer;
+const fields=["european_aqi","pm2_5","pm10","nitrogen_dioxide","ozone","carbon_monoxide","sulphur_dioxide"];
+function level(v){if(v==null)return ["Keine Daten",""];if(v<=20)return ["Gut","good"];if(v<=40)return ["Mäßig","fair"];if(v<=60)return ["Moderat","moderate"];if(v<=80)return ["Schlecht","poor"];if(v<=100)return ["Sehr schlecht","verypoor"];return ["Extrem schlecht","extreme"]}
+function applyTheme(aqi){
+  const body=document.body;
+  if(aqi==null||!Number.isFinite(Number(aqi))){body.dataset.airQuality="good";return}
+  const value=Number(aqi);
+  // EU AQI: good (0–20), fair (20–40), moderate (40–60), poor (60–80), very poor/extreme (>80).
+  body.dataset.airQuality=value<=20?"good":value<=40?"fair":value<=60?"moderate":"poor";
+}
+function fmt(v){return v==null||!Number.isFinite(v)?"—":Number(v).toFixed(1)}
+function setPollutant(id,v,max){$(id).innerHTML=fmt(v)+' <span class="unit">μg/m³</span>'; $("bar-"+id).style.width=Math.max(2,Math.min(100,(Number(v)||0)/max*100))+"%"}
+function recommendation(aqi){if(aqi<=20)return ["Perfekte Bedingungen für draußen","Die Luft ist aktuell sauber. Genieße Spaziergänge, Sport und Zeit im Freien."];if(aqi<=40)return ["Gute Bedingungen im Freien","Die Luftqualität ist insgesamt gut. Für die meisten Menschen sind Aktivitäten draußen unproblematisch."];if(aqi<=60)return ["Etwas achtsamer unterwegs","Empfindliche Personen können längere, intensive Aktivitäten im Freien reduzieren."];return ["Aktivitäten draußen anpassen","Begrenze anstrengende Aktivitäten im Freien, besonders wenn du empfindlich auf Luftverschmutzung reagierst."]}
+function drawChart(times,values){const svg=$("chart");const valid=values.map((v,i)=>({v:Number(v),t:times[i]})).filter(x=>Number.isFinite(x.v));if(!valid.length){svg.innerHTML="";return}const arr=valid.slice(0,24),max=Math.max(40,...arr.map(x=>x.v))*1.15,min=0;const pts=arr.map((x,i)=>[i/(Math.max(1,arr.length-1))*900,126-(x.v-min)/(max-min)*105]);const path=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");const area=path+" L 900 140 L 0 140 Z";svg.innerHTML=`<defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--chart-fill)" stop-opacity=".35"/><stop offset="100%" stop-color="var(--chart-fill)" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="120" x2="900" y2="120" stroke="#e8ece6"/><line x1="0" y1="65" x2="900" y2="65" stroke="#edf0eb" stroke-dasharray="4 5"/><path d="${area}" fill="url(#fill)"/><path d="${path}" fill="none" stroke="var(--chart-line)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`+pts.filter((_,i)=>i%Math.max(1,Math.floor(pts.length/8))===0).map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="#78ad4f" stroke="white" stroke-width="2"/>`).join("");const indexes=[0,Math.floor(arr.length*.25),Math.floor(arr.length*.5),Math.floor(arr.length*.75),arr.length-1];$("chartLabels").innerHTML=indexes.map(i=>`<span>${arr[i]?.t.slice(11,16)||"—"}</span>`).join("")}
+function hasUsableAirData(data){
+  const current=data?.current||{};
+  const currentValues=fields.map(key=>current[key]);
+  const hourlyValues=data?.hourly?.european_aqi||[];
+  return currentValues.some(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v))) ||
+    hourlyValues.some(v=>v!==null&&v!==undefined&&Number.isFinite(Number(v)));
+}
+function setDataUnavailable(unavailable){
+  document.body.dataset.dataUnavailable=unavailable?"true":"false";
+  $("availabilityNotice").hidden=!unavailable;
+}
+async function loadAir(){
+  const p=new URLSearchParams({latitude:locationNow.lat,longitude:locationNow.lon,current:fields.join(","),hourly:"european_aqi",timezone:"auto",forecast_days:"1"});
+  $("status").textContent="Aktualisiere Messwerte …";
+  try{
+    const r=await fetch("https://air-quality-api.open-meteo.com/v1/air-quality?"+p);
+    if(!r.ok)throw new Error("API antwortet mit "+r.status);
+    const d=await r.json();
+    if(d.error)throw new Error(d.reason||"API-Fehler");
+    if(!hasUsableAirData(d))throw new Error("Die API hat keine verwertbaren Luftqualitätsdaten geliefert.");
+
+    const c=d.current||{};
+    const aqi=c.european_aqi;
+    setDataUnavailable(false);
+    applyTheme(aqi);
+    $("aqi").textContent=aqi==null?"—":Math.round(aqi);
+    $("gaugeLabel").textContent=aqi==null?"—":Math.round(aqi);
+    $("quality").textContent=level(aqi)[0];
+    $("updated").textContent=c.time?new Date(c.time).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr":"—";
+    $("timezone").textContent=d.timezone||"—";
+    $("coords").textContent=Number.isFinite(Number(d.latitude))&&Number.isFinite(Number(d.longitude))?Number(d.latitude).toFixed(2)+"° N · "+Number(d.longitude).toFixed(2)+"° E":"—";
+    setPollutant("pm25",c.pm2_5,50);
+    setPollutant("pm10",c.pm10,100);
+    setPollutant("no2",c.nitrogen_dioxide,100);
+    setPollutant("o3",c.ozone,120);
+    if(aqi!=null&&Number.isFinite(Number(aqi))){
+      const [t,desc]=recommendation(Number(aqi));
+      $("tipTitle").textContent=t;
+      $("tipText").textContent=desc;
+    }else{
+      $("tipTitle").textContent="Dein Luft-Impuls";
+      $("tipText").textContent="Für eine persönliche Empfehlung ist aktuell kein Luftqualitätsindex verfügbar.";
+    }
+    drawChart(d.hourly?.time||[],d.hourly?.european_aqi||[]);
+    $("status").textContent="Daten erfolgreich geladen · automatische Aktualisierung alle 15 Minuten";
+  }catch(e){
+    setDataUnavailable(true);
+    $("status").textContent="Daten konnten nicht geladen werden: "+e.message;
+  }
+}
+async function searchPlace(name){if(!name.trim())return; $("status").textContent="Suche Ort …";try{const url="https://geocoding-api.open-meteo.com/v1/search?"+new URLSearchParams({name:name,count:1,language:"de",format:"json"});const r=await fetch(url);const d=await r.json();if(!d.results?.length)throw new Error("Ort nicht gefunden.");const x=d.results[0];locationNow={name:[x.name,x.admin1,x.country].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(", "),lat:x.latitude,lon:x.longitude};$("placeName").textContent=locationNow.name;await loadAir()}catch(e){$("status").textContent=e.message}}
+$("searchForm").addEventListener("submit",e=>{e.preventDefault();searchPlace($("placeInput").value)});loadAir();refreshTimer=setInterval(loadAir,15*60*1000);
+</script>
+</body>
+</html>
